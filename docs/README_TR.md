@@ -5,7 +5,7 @@ GModStore'daki iş ilanlarını otomatik olarak takip eden ve yeni ilanları Dis
 ## 🌐 Dil / Language
 
 - **[Türkçe](README_TR.md)** (Mevcut)
-- **[English](README.md)**
+- **[English](../README.md)**
 
 ---
 
@@ -150,12 +150,13 @@ gmodstore_scrapper/
 ├── requirements.txt     # Python bağımlılıkları
 ├── seen_jobs.json       # Görülen ilanlar (otomatik oluşur)
 ├── venv/                # Virtual environment (gitignore'da)
-├── README.md            # Bu dosya (İngilizce)
-├── README_TR.md         # Türkçe versiyon
-├── INSTALLATION.md      # Windows kurulum rehberi (İngilizce)
-├── KURULUM.md           # Windows kurulum rehberi (Türkçe)
-├── LINUX_INSTALLATION.md # Linux kurulum rehberi (İngilizce)
-└── LINUX_KURULUM.md     # Linux kurulum rehberi (Türkçe)
+├── README.md            # Ana README (İngilizce)
+└── docs/                # Dokümantasyon klasörü
+    ├── README_TR.md         # Türkçe versiyon
+    ├── INSTALLATION.md      # Windows kurulum rehberi (İngilizce)
+    ├── KURULUM.md           # Windows kurulum rehberi (Türkçe)
+    ├── LINUX_INSTALLATION.md # Linux kurulum rehberi (İngilizce)
+    └── LINUX_KURULUM.md     # Linux kurulum rehberi (Türkçe)
 ```
 
 ## Yapılandırma Seçenekleri

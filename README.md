@@ -5,7 +5,7 @@ A Python application that automatically tracks job listings on GModStore and sen
 ## 🌐 Language / Dil
 
 - **[English](README.md)** (Current)
-- **[Türkçe](README_TR.md)**
+- **[Türkçe](docs/README_TR.md)**
 
 ---
 
@@ -151,11 +151,22 @@ gmodstore_scrapper/
 ├── seen_jobs.json       # Seen listings (auto-generated)
 ├── venv/                # Virtual environment (in gitignore)
 ├── README.md            # This file (English)
-├── README_TR.md         # Turkish version
-├── INSTALLATION.md      # Windows installation guide (English)
-├── KURULUM.md           # Windows installation guide (Turkish)
-├── LINUX_INSTALLATION.md # Linux installation guide (English)
-└── LINUX_KURULUM.md     # Linux installation guide (Turkish)
+├── docs/                # Documentation folder
+│   ├── README_TR.md         # Turkish version
+│   ├── INSTALLATION.md      # Windows installation guide (English)
+│   ├── KURULUM.md           # Windows installation guide (Turkish)
+│   ├── LINUX_INSTALLATION.md # Linux installation guide (English)
+│   └── LINUX_KURULUM.md     # Linux installation guide (Turkish)
+├── scripts/             # Scripts folder
+│   ├── start.bat            # Windows start script
+│   └── setup_linux.sh       # Linux setup script
+└── deploy/              # Deployment configurations
+    ├── systemd/             # Systemd service files
+    │   └── gmodstore-scraper.service
+    └── docker/              # Docker deployment files
+        ├── Dockerfile
+        ├── docker-compose.yml
+        └── README.md
 ```
 
 ## Configuration Options
@@ -225,10 +236,10 @@ pip install --upgrade -r requirements.txt
 
 ## Documentation
 
-- **[Windows Installation Guide (English)](INSTALLATION.md)**
-- **[Windows Installation Guide (Turkish)](KURULUM.md)**
-- **[Linux Installation Guide (English)](LINUX_INSTALLATION.md)**
-- **[Linux Installation Guide (Turkish)](LINUX_KURULUM.md)**
+- **[Windows Installation Guide (English)](docs/INSTALLATION.md)**
+- **[Windows Installation Guide (Turkish)](docs/KURULUM.md)**
+- **[Linux Installation Guide (English)](docs/LINUX_INSTALLATION.md)**
+- **[Linux Installation Guide (Turkish)](docs/LINUX_KURULUM.md)**
 
 ## License
 

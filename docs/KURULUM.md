@@ -3,7 +3,7 @@
 ## 🌐 Dil / Language
 
 - **[Türkçe](KURULUM.md)** (Mevcut)
-- **[English](INSTALLATION.md)**
+- **[English](INSTALLATION.md)** | **[Ana README](../README.md)**
 
 ---
 
@@ -36,7 +36,7 @@ Dosyayı kaydedin ve kapatın.
 
 ### Yöntem 1: Batch Dosyası ile (Önerilen)
 
-`start.bat` dosyasına çift tıklayın. Uygulama otomatik olarak başlayacaktır.
+`scripts/start.bat` dosyasına çift tıklayın. Uygulama otomatik olarak başlayacaktır.
 
 ### Yöntem 2: PowerShell ile
 
@@ -165,4 +165,4 @@ Hata mesajları `[ERROR]` etiketi ile başlar.
 
 ---
 
-**[View English Version](INSTALLATION.md)**
+**[View English Version](INSTALLATION.md)** | **[View Main README](../README.md)**

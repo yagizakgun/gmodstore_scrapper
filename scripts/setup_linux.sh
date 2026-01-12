@@ -17,9 +17,11 @@ NC='\033[0m' # No Color
 # Mevcut kullanıcı ve dizin
 CURRENT_USER=$(whoami)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo -e "${GREEN}[INFO]${NC} Kullanıcı: $CURRENT_USER"
-echo -e "${GREEN}[INFO]${NC} Dizin: $SCRIPT_DIR"
+echo -e "${GREEN}[INFO]${NC} Script Dizini: $SCRIPT_DIR"
+echo -e "${GREEN}[INFO]${NC} Proje Dizini: $PROJECT_ROOT"
 echo ""
 
 # Python kontrolü
@@ -36,8 +38,8 @@ fi
 # Virtual environment oluştur
 echo ""
 echo -e "${YELLOW}[2/5]${NC} Virtual environment oluşturuluyor..."
-if [ ! -d "$SCRIPT_DIR/venv" ]; then
-    python3 -m venv "$SCRIPT_DIR/venv"
+if [ ! -d "$PROJECT_ROOT/venv" ]; then
+    python3 -m venv "$PROJECT_ROOT/venv"
     echo -e "${GREEN}[OK]${NC} venv oluşturuldu"
 else
     echo -e "${GREEN}[OK]${NC} venv zaten mevcut"
@@ -46,21 +48,22 @@ fi
 # Bağımlılıkları yükle
 echo ""
 echo -e "${YELLOW}[3/5]${NC} Bağımlılıklar yükleniyor..."
-source "$SCRIPT_DIR/venv/bin/activate"
-pip install -q -r "$SCRIPT_DIR/requirements.txt"
+source "$PROJECT_ROOT/venv/bin/activate"
+pip install -q -r "$PROJECT_ROOT/requirements.txt"
 echo -e "${GREEN}[OK]${NC} Bağımlılıklar yüklendi"
 
 # Service dosyasını güncelle
 echo ""
 echo -e "${YELLOW}[4/5]${NC} Service dosyası hazırlanıyor..."
-SERVICE_FILE="$SCRIPT_DIR/gmodstore-scraper.service"
+SERVICE_FILE="$PROJECT_ROOT/deploy/systemd/gmodstore-scraper.service"
+SERVICE_FILE_TEMP="$PROJECT_ROOT/gmodstore-scraper.service"
 
-# Yedek al
-cp "$SERVICE_FILE" "$SERVICE_FILE.backup"
+# Service dosyasını geçici olarak kopyala
+cp "$SERVICE_FILE" "$SERVICE_FILE_TEMP"
 
 # Kullanıcı ve yolu güncelle
-sed -i "s|YOUR_USERNAME|$CURRENT_USER|g" "$SERVICE_FILE"
-sed -i "s|/home/$CURRENT_USER/gmodstore_scrapper|$SCRIPT_DIR|g" "$SERVICE_FILE"
+sed -i "s|YOUR_USERNAME|$CURRENT_USER|g" "$SERVICE_FILE_TEMP"
+sed -i "s|/home/$CURRENT_USER/gmodstore_scrapper|$PROJECT_ROOT|g" "$SERVICE_FILE_TEMP"
 
 echo -e "${GREEN}[OK]${NC} Service dosyası güncellendi"
 
@@ -68,7 +71,7 @@ echo -e "${GREEN}[OK]${NC} Service dosyası güncellendi"
 echo ""
 echo -e "${YELLOW}[5/5]${NC} Service kurulumu için aşağıdaki komutları çalıştırın:"
 echo ""
-echo -e "${GREEN}sudo cp $SERVICE_FILE /etc/systemd/system/${NC}"
+echo -e "${GREEN}sudo cp $SERVICE_FILE_TEMP /etc/systemd/system/${NC}"
 echo -e "${GREEN}sudo systemctl daemon-reload${NC}"
 echo -e "${GREEN}sudo systemctl enable gmodstore-scraper${NC}"
 echo -e "${GREEN}sudo systemctl start gmodstore-scraper${NC}"
@@ -76,10 +79,10 @@ echo ""
 
 # Config kontrolü
 echo "========================================"
-if grep -q "BURAYA_WEBHOOK_URL_GIRILECEK" "$SCRIPT_DIR/config.py" 2>/dev/null; then
+if grep -q "BURAYA_WEBHOOK_URL_GIRILECEK" "$PROJECT_ROOT/config.py" 2>/dev/null; then
     echo -e "${RED}[UYARI]${NC} config.py'de DISCORD_WEBHOOK_URL ayarlanmamış!"
     echo "Önce config.py dosyasını düzenleyin:"
-    echo "  nano $SCRIPT_DIR/config.py"
+    echo "  nano $PROJECT_ROOT/config.py"
 else
     echo -e "${GREEN}[OK]${NC} Webhook URL ayarlanmış görünüyor"
 fi
@@ -89,9 +92,9 @@ echo "========================================"
 echo -e "${GREEN}Kurulum tamamlandı!${NC}"
 echo ""
 echo "Manuel test için:"
-echo "  cd $SCRIPT_DIR"
+echo "  cd $PROJECT_ROOT"
 echo "  source venv/bin/activate"
 echo "  python main.py"
 echo ""
-echo "Detaylı bilgi: LINUX_KURULUM.md"
+echo "Detaylı bilgi: docs/LINUX_KURULUM.md"
 echo "========================================"

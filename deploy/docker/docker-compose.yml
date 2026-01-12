@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  gmodstore-scraper:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile
+    container_name: gmodstore-scraper
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Istanbul
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Config dosyasını mount et (opsiyonel, environment variable da kullanılabilir)
+      - ../../config.py:/app/config.py:ro
+      # Seen jobs dosyasını persist et
+      - ./data:/app/data
+    # Log ayarları
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

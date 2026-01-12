@@ -80,7 +80,7 @@ Systemd will:
 
 ```bash
 # Edit service file
-nano ~/gmodstore_scrapper/gmodstore-scraper.service
+nano ~/gmodstore_scrapper/deploy/systemd/gmodstore-scraper.service
 ```
 
 **Replace the following lines with your information:**
@@ -96,7 +96,7 @@ ExecStart=/home/YOUR_USERNAME/gmodstore_scrapper/venv/bin/python main.py → Exe
 
 ```bash
 # Copy service file
-sudo cp ~/gmodstore_scrapper/gmodstore-scraper.service /etc/systemd/system/
+sudo cp ~/gmodstore_scrapper/deploy/systemd/gmodstore-scraper.service /etc/systemd/system/
 
 # Reload systemd
 sudo systemctl daemon-reload
@@ -237,7 +237,7 @@ sudo systemctl start docker
 
 # Build Dockerfile (already in project)
 cd ~/gmodstore_scrapper
-docker build -t gmodstore-scraper .
+docker build -t gmodstore-scraper -f deploy/docker/Dockerfile .
 
 # Run
 docker run -d --name gmodstore-scraper --restart=always gmodstore-scraper
@@ -283,4 +283,4 @@ A: No, journald automatically rotates logs.
 
 ---
 
-**[View Turkish Version](LINUX_KURULUM.md)**
+**[View Turkish Version](LINUX_KURULUM.md)** | **[View Main README](../README.md)**

@@ -29,7 +29,7 @@ Save and close the file.
 
 ### Method 1: Using Batch File (Recommended)
 
-Double-click the `start.bat` file. The application will start automatically.
+Double-click the `scripts/start.bat` file. The application will start automatically.
 
 ### Method 2: Using PowerShell
 
@@ -159,4 +159,4 @@ Error messages start with `[ERROR]` tag.
 
 ---
 
-**[View Turkish Version](KURULUM.md)**
+**[View Turkish Version](KURULUM.md)** | **[View Main README](../README.md)**

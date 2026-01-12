@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Uygulama dosyaları
 COPY *.py ./
+COPY config.py ./
 
 # Zaman dilimi (opsiyonel)
 ENV TZ=Europe/Istanbul

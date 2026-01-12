@@ -5,7 +5,7 @@ Bu rehber, GModStore Job Scraper botunu Linux sunucunuzda kurup 7/24 çalışır
 ## 🌐 Dil / Language
 
 - **[Türkçe](LINUX_KURULUM.md)** (Mevcut)
-- **[English](LINUX_INSTALLATION.md)**
+- **[English](LINUX_INSTALLATION.md)** | **[Ana README](../README.md)**
 
 ---
 
@@ -85,7 +85,7 @@ Systemd, botunuzu:
 
 ```bash
 # Service dosyasını düzenleyin
-nano ~/gmodstore_scrapper/gmodstore-scraper.service
+nano ~/gmodstore_scrapper/deploy/systemd/gmodstore-scraper.service
 ```
 
 **Aşağıdaki satırları kendi bilgilerinizle değiştirin:**
@@ -101,7 +101,7 @@ ExecStart=/home/YOUR_USERNAME/gmodstore_scrapper/venv/bin/python main.py → Exe
 
 ```bash
 # Service dosyasını kopyalayın
-sudo cp ~/gmodstore_scrapper/gmodstore-scraper.service /etc/systemd/system/
+sudo cp ~/gmodstore_scrapper/deploy/systemd/gmodstore-scraper.service /etc/systemd/system/
 
 # Systemd'yi yeniden yükleyin
 sudo systemctl daemon-reload
@@ -125,7 +125,6 @@ sudo systemctl status gmodstore-scraper
 ```
 ● gmodstore-scraper.service - GModStore Job Market Discord Scraper
      Active: active (running) since ...
-```
 ```
 
 ---
@@ -244,7 +243,7 @@ sudo systemctl start docker
 
 # Dockerfile oluşturun (zaten projede var)
 cd ~/gmodstore_scrapper
-docker build -t gmodstore-scraper .
+docker build -t gmodstore-scraper -f deploy/docker/Dockerfile .
 
 # Çalıştırın
 docker run -d --name gmodstore-scraper --restart=always gmodstore-scraper
@@ -290,4 +289,4 @@ C: Hayır, journald otomatik log rotasyonu yapar.
 
 ---
 
-**[View English Version](LINUX_INSTALLATION.md)**
+**[View English Version](LINUX_INSTALLATION.md)** | **[View Main README](../README.md)**
