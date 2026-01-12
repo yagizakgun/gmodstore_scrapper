@@ -13,7 +13,10 @@ A Python application that automatically tracks job listings on GModStore and sen
 
 - ✅ Automatic check every 30 minutes
 - ✅ Only sends active listings (Apply, In Progress, Negotiations)
-- ✅ Beautiful Discord embed messages
+- ✅ **NEW**: Fetches detailed information from each job page (Budget, Category, Applications, Views)
+- ✅ **NEW**: Automatic due date validation - filters out expired jobs
+- ✅ **NEW**: Prevents sending old/expired jobs on first startup
+- ✅ Beautiful Discord embed messages with comprehensive information
 - ✅ Duplicate message prevention system
 - ✅ Graceful shutdown (safe shutdown with Ctrl+C)
 - ✅ Rate limit protection
@@ -176,6 +179,7 @@ You can modify the following in `config.py`:
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `CHECK_INTERVAL` | 1800 (30min) | Check interval (seconds) |
+| `DETAIL_REQUEST_DELAY` | 1.5 | Delay between detail page requests (seconds) |
 | `ACTIVE_JOB_STATUSES` | Apply, In Progress, Negotiations | Status types to send |
 | `STATUS_COLORS` | ... | Discord embed colors |
 
@@ -192,6 +196,12 @@ You can modify the following in `config.py`:
 - Check if GModStore is accessible
 - HTML structure may have changed (scraper.py needs update)
 - Run `scraper.py` in test mode: `python scraper.py`
+
+### All jobs filtered out as expired
+
+- This is normal if all jobs on GModStore have passed their due date
+- System automatically filters expired jobs to prevent spam
+- New active jobs will be sent when they appear
 
 ### Virtual environment not activated
 
@@ -240,6 +250,7 @@ pip install --upgrade -r requirements.txt
 - **[Windows Installation Guide (Turkish)](docs/KURULUM.md)**
 - **[Linux Installation Guide (English)](docs/LINUX_INSTALLATION.md)**
 - **[Linux Installation Guide (Turkish)](docs/LINUX_KURULUM.md)**
+- **[Changelog](CHANGELOG.md)** - Version history and updates
 
 ## License
 

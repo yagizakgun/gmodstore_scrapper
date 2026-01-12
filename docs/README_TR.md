@@ -13,7 +13,10 @@ GModStore'daki iş ilanlarını otomatik olarak takip eden ve yeni ilanları Dis
 
 - ✅ 30 dakikada bir otomatik kontrol
 - ✅ Sadece aktif ilanları gönderir (Apply, In Progress, Negotiations)
-- ✅ Güzel Discord embed mesajları
+- ✅ **YENİ**: Her ilanın detay sayfasından bilgi çeker (Bütçe, Kategori, Başvurular, Görüntüleme)
+- ✅ **YENİ**: Otomatik son başvuru tarihi kontrolü - süresi geçmiş ilanları filtreler
+- ✅ **YENİ**: İlk başlatmada eski/süresi geçmiş ilanları göndermez
+- ✅ Kapsamlı bilgilerle güzel Discord embed mesajları
 - ✅ Tekrarlayan mesaj önleme sistemi
 - ✅ Graceful shutdown (Ctrl+C ile güvenli kapanma)
 - ✅ Rate limit koruması
@@ -166,6 +169,7 @@ gmodstore_scrapper/
 | Ayar | Varsayılan | Açıklama |
 |------|-----------|----------|
 | `CHECK_INTERVAL` | 1800 (30dk) | Kontrol aralığı (saniye) |
+| `DETAIL_REQUEST_DELAY` | 1.5 | Detay sayfası istekleri arası gecikme (saniye) |
 | `ACTIVE_JOB_STATUSES` | Apply, In Progress, Negotiations | Gönderilecek durum tipleri |
 | `STATUS_COLORS` | ... | Discord embed renkleri |
 
@@ -182,6 +186,12 @@ gmodstore_scrapper/
 - GModStore'un erişilebilir olduğunu kontrol edin
 - HTML yapısı değişmiş olabilir (scraper.py güncellenmeli)
 - `scraper.py`'yi test modunda çalıştırın: `python scraper.py`
+
+### Tüm ilanlar süresi geçmiş olarak filtrelendi
+
+- GModStore'daki tüm ilanların son başvuru tarihi geçmişse bu normaldir
+- Sistem spam önlemek için süresi geçmiş ilanları otomatik filtreler
+- Yeni aktif ilanlar göründüğünde otomatik olarak gönderilecektir
 
 ### Virtual environment aktif değil
 
@@ -230,6 +240,7 @@ pip install --upgrade -r requirements.txt
 - **[Windows Kurulum Rehberi (Türkçe)](KURULUM.md)**
 - **[Linux Kurulum Rehberi (İngilizce)](LINUX_INSTALLATION.md)**
 - **[Linux Kurulum Rehberi (Türkçe)](LINUX_KURULUM.md)**
+- **[Değişiklik Günlüğü](../CHANGELOG.md)** - Versiyon geçmişi ve güncellemeler
 
 ## Lisans
 

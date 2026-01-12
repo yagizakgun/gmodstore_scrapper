@@ -6,6 +6,9 @@ DISCORD_WEBHOOK_URL = "DISCORD_WEBHHOK_URL"
 # Check interval (in seconds)
 CHECK_INTERVAL = 1800  # 30 minutes
 
+# Detail page request delay (in seconds) - prevents rate limiting
+DETAIL_REQUEST_DELAY = 1.5
+
 # GModStore job listings URL
 GMODSTORE_JOBS_URL = "https://www.gmodstore.com/jobmarket/jobs/browse"
 
