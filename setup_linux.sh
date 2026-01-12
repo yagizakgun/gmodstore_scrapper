@@ -1,0 +1,97 @@
+#!/bin/bash
+# GModStore Job Scraper - Linux Otomatik Kurulum Scripti
+
+set -e
+
+echo "========================================"
+echo "GModStore Scraper - Linux Kurulum"
+echo "========================================"
+echo ""
+
+# Renk kodları
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Mevcut kullanıcı ve dizin
+CURRENT_USER=$(whoami)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo -e "${GREEN}[INFO]${NC} Kullanıcı: $CURRENT_USER"
+echo -e "${GREEN}[INFO]${NC} Dizin: $SCRIPT_DIR"
+echo ""
+
+# Python kontrolü
+echo -e "${YELLOW}[1/5]${NC} Python kontrol ediliyor..."
+if command -v python3 &> /dev/null; then
+    PYTHON_VERSION=$(python3 --version)
+    echo -e "${GREEN}[OK]${NC} $PYTHON_VERSION bulundu"
+else
+    echo -e "${RED}[ERROR]${NC} Python3 bulunamadı!"
+    echo "Kurmak için: sudo apt install python3 python3-pip python3-venv"
+    exit 1
+fi
+
+# Virtual environment oluştur
+echo ""
+echo -e "${YELLOW}[2/5]${NC} Virtual environment oluşturuluyor..."
+if [ ! -d "$SCRIPT_DIR/venv" ]; then
+    python3 -m venv "$SCRIPT_DIR/venv"
+    echo -e "${GREEN}[OK]${NC} venv oluşturuldu"
+else
+    echo -e "${GREEN}[OK]${NC} venv zaten mevcut"
+fi
+
+# Bağımlılıkları yükle
+echo ""
+echo -e "${YELLOW}[3/5]${NC} Bağımlılıklar yükleniyor..."
+source "$SCRIPT_DIR/venv/bin/activate"
+pip install -q -r "$SCRIPT_DIR/requirements.txt"
+echo -e "${GREEN}[OK]${NC} Bağımlılıklar yüklendi"
+
+# Service dosyasını güncelle
+echo ""
+echo -e "${YELLOW}[4/5]${NC} Service dosyası hazırlanıyor..."
+SERVICE_FILE="$SCRIPT_DIR/gmodstore-scraper.service"
+
+# Yedek al
+cp "$SERVICE_FILE" "$SERVICE_FILE.backup"
+
+# Kullanıcı ve yolu güncelle
+sed -i "s|YOUR_USERNAME|$CURRENT_USER|g" "$SERVICE_FILE"
+sed -i "s|/home/$CURRENT_USER/gmodstore_scrapper|$SCRIPT_DIR|g" "$SERVICE_FILE"
+
+echo -e "${GREEN}[OK]${NC} Service dosyası güncellendi"
+
+# Kurulum talimatları
+echo ""
+echo -e "${YELLOW}[5/5]${NC} Service kurulumu için aşağıdaki komutları çalıştırın:"
+echo ""
+echo -e "${GREEN}sudo cp $SERVICE_FILE /etc/systemd/system/${NC}"
+echo -e "${GREEN}sudo systemctl daemon-reload${NC}"
+echo -e "${GREEN}sudo systemctl enable gmodstore-scraper${NC}"
+echo -e "${GREEN}sudo systemctl start gmodstore-scraper${NC}"
+echo ""
+
+# Config kontrolü
+echo "========================================"
+if grep -q "BURAYA_WEBHOOK_URL_GIRILECEK" "$SCRIPT_DIR/config.py" 2>/dev/null; then
+    echo -e "${RED}[UYARI]${NC} config.py'de DISCORD_WEBHOOK_URL ayarlanmamış!"
+    echo "Önce config.py dosyasını düzenleyin:"
+    echo "  nano $SCRIPT_DIR/config.py"
+else
+    echo -e "${GREEN}[OK]${NC} Webhook URL ayarlanmış görünüyor"
+fi
+
+echo ""
+echo "========================================"
+echo -e "${GREEN}Kurulum tamamlandı!${NC}"
+echo ""
+echo "Manuel test için:"
+echo "  cd $SCRIPT_DIR"
+echo "  source venv/bin/activate"
+echo "  python main.py"
+echo ""
+echo "Detaylı bilgi: LINUX_KURULUM.md"
+echo "========================================"

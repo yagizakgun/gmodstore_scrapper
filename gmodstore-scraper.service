@@ -1,0 +1,21 @@
+[Unit]
+Description=GModStore Job Market Discord Scraper
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/gmodstore_scrapper
+ExecStart=/home/YOUR_USERNAME/gmodstore_scrapper/venv/bin/python main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Ortam değişkenleri (opsiyonel)
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
