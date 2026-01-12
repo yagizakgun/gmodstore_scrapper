@@ -1,6 +1,6 @@
 """
 GModStore Job Market Scraper
-Web scraping modülü - İş ilanlarını çeker ve parse eder
+Web scraping module - Fetches and parses job listings
 """
 
 import requests
@@ -19,10 +19,10 @@ class JobScraper:
     
     def fetch_jobs(self) -> List[Dict]:
         """
-        GModStore job market sayfasından iş ilanlarını çeker
+        Fetches job listings from GModStore job market page
         
         Returns:
-            List[Dict]: İş ilanları listesi
+            List[Dict]: List of job listings
         """
         try:
             response = self.session.get(config.GMODSTORE_JOBS_URL, timeout=10)
@@ -34,33 +34,33 @@ class JobScraper:
             return jobs
         
         except requests.RequestException as e:
-            print(f"[ERROR] GModStore'a bağlanırken hata: {e}")
+            print(f"[ERROR] Error connecting to GModStore: {e}")
             return []
         except Exception as e:
-            print(f"[ERROR] İlanları parse ederken hata: {e}")
+            print(f"[ERROR] Error parsing listings: {e}")
             return []
     
     def _parse_jobs(self, soup: BeautifulSoup) -> List[Dict]:
         """
-        HTML'den iş ilanlarını parse eder
+        Parses job listings from HTML
         
         Args:
-            soup: BeautifulSoup nesnesi
+            soup: BeautifulSoup object
             
         Returns:
-            List[Dict]: Parse edilmiş iş ilanları
+            List[Dict]: Parsed job listings
         """
         jobs = []
         
-        # İş ilanı kartlarını bul - GModStore'un gerçek yapısına göre
+        # Find job listing cards - according to GModStore's actual structure
         job_cards = soup.find_all('div', class_='item-listing item-listing--job')
         
         if not job_cards:
-            print("[WARNING] 'item-listing--job' class'ı bulunamadı, alternatif deneniyor...")
-            # Alternatif selector
+            print("[WARNING] 'item-listing--job' class not found, trying alternative...")
+            # Alternative selector
             job_cards = soup.select('div.item-listing')
         
-        print(f"[DEBUG] {len(job_cards)} iş kartı bulundu")
+        print(f"[DEBUG] Found {len(job_cards)} job cards")
         
         for card in job_cards:
             try:
@@ -68,24 +68,24 @@ class JobScraper:
                 if job_data and self._is_valid_job(job_data):
                     jobs.append(job_data)
             except Exception as e:
-                print(f"[WARNING] İlan parse edilirken hata: {e}")
+                print(f"[WARNING] Error parsing listing: {e}")
                 continue
         
         return jobs
     
     def _extract_job_data(self, card) -> Optional[Dict]:
         """
-        Tek bir iş ilanı kartından veri çıkarır
+        Extracts data from a single job listing card
         
         Args:
             card: BeautifulSoup element
             
         Returns:
-            Dict: İlan verisi veya None
+            Dict: Job listing data or None
         """
         job = {}
         
-        # URL çıkar (en önemli - unique identifier)
+        # Extract URL (most important - unique identifier)
         link = card.find('a', class_='item-listing__link')
         if not link or not link.get('href'):
             return None
@@ -94,44 +94,44 @@ class JobScraper:
         if not href.startswith('http'):
             href = f"https://www.gmodstore.com{href}"
         
-        # Job URL doğrulama - /jobmarket/jobs/ içermeli
+        # Job URL validation - must contain /jobmarket/jobs/
         if '/jobmarket/jobs/' not in href:
             return None
             
         job['url'] = href
         job['job_id'] = href.split('/')[-1]
         
-        # Başlık - item-listing__name div'inden al
+        # Title - get from item-listing__name div
         title_elem = card.find('div', class_='item-listing__name')
         if title_elem:
-            # Önce title attribute'unu dene (tam başlık burada)
+            # Try title attribute first (full title is here)
             job['title'] = title_elem.get('title', '').strip() or title_elem.get_text(strip=True)
         else:
-            job['title'] = "Başlık bulunamadı"
+            job['title'] = "Title not found"
         
-        # "Post a job" gibi navigasyon elementlerini filtrele
+        # Filter navigation elements like "Post a job"
         if job['title'].lower() in ['post a job', 'browse jobs', 'create job', '']:
             return None
         
-        # Budget - item-listing__bottom__right__price div'inden al
+        # Budget - get from item-listing__bottom__right__price div
         price_elem = card.find('div', class_='item-listing__bottom__right__price')
         if price_elem:
             job['budget'] = price_elem.get_text(strip=True)
         else:
             job['budget'] = "N/A"
         
-        # Category ve Applications - card-body p elementinden parse et
+        # Category and Applications - parse from card-body p element
         # Format: "Gamemode - 2 applicants"
         card_body = card.find('div', class_='card-body')
         if card_body:
             p_elem = card_body.find('p')
             if p_elem:
                 body_text = p_elem.get_text(strip=True)
-                # Category ve applicant sayısını ayır
+                # Separate category and applicant count
                 if ' - ' in body_text:
                     parts = body_text.rsplit(' - ', 1)
                     job['category'] = parts[0].strip()
-                    # Applicant sayısını çıkar
+                    # Extract applicant count
                     app_match = re.search(r'(\d+)\s*applicant', parts[1], re.I)
                     job['applications'] = int(app_match.group(1)) if app_match else 0
                 else:
@@ -144,48 +144,48 @@ class JobScraper:
             job['category'] = "N/A"
             job['applications'] = 0
         
-        # Listeleme tarihi - v-date-time elementinden al
+        # Listing date - get from v-date-time element
         date_elem = card.find('v-date-time')
         if date_elem and date_elem.get('time'):
             job['listed_date'] = date_elem['time']
         else:
             job['listed_date'] = "N/A"
         
-        # Views (liste sayfasında mevcut değil, detay sayfasından alınabilir)
+        # Views (not available on listing page, can be fetched from detail page)
         job['views'] = 0
         
-        # Description (liste sayfasında mevcut değil)
+        # Description (not available on listing page)
         job['description'] = f"Budget: {job['budget']} | Category: {job['category']} | Applications: {job['applications']}"
         
-        # Due Date (liste sayfasında mevcut değil)
+        # Due Date (not available on listing page)
         job['due_date'] = "N/A"
         
-        # Status - aktif ilanlar listede görünür, default "Apply"
+        # Status - active listings appear in list, default "Apply"
         job['status'] = "Apply"
         
         return job
     
     def _is_valid_job(self, job: Dict) -> bool:
         """
-        İş ilanının geçerli olup olmadığını kontrol eder
+        Checks if a job listing is valid
         
         Args:
-            job: İş ilanı verisi
+            job: Job listing data
             
         Returns:
-            bool: Geçerli mi?
+            bool: Is valid?
         """
-        # URL ve job_id olmalı
+        # Must have URL and job_id
         if not job.get('url') or not job.get('job_id'):
             return False
         
-        # Sadece aktif durumları kabul et
+        # Only accept active statuses
         if job.get('status') not in config.ACTIVE_JOB_STATUSES:
             return False
         
-        # Başlık anlamlı olmalı
+        # Title must be meaningful
         title = job.get('title', '').lower()
-        invalid_titles = ['post a job', 'browse jobs', 'create job', 'başlık bulunamadı', '']
+        invalid_titles = ['post a job', 'browse jobs', 'create job', 'title not found', '']
         if title in invalid_titles:
             return False
         
@@ -193,14 +193,14 @@ class JobScraper:
     
     def fetch_job_details(self, job_url: str) -> Dict:
         """
-        Tek bir iş ilanının detaylarını çeker
-        Bu fonksiyon ihtiyaç halinde kullanılabilir
+        Fetches details of a single job listing
+        This function can be used when needed
         
         Args:
-            job_url: İlan URL'si
+            job_url: Job listing URL
             
         Returns:
-            Dict: Detaylı ilan verisi
+            Dict: Detailed job listing data
         """
         try:
             response = self.session.get(job_url, timeout=10)
@@ -208,7 +208,7 @@ class JobScraper:
             
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # Detaylı parsing yapılabilir
+            # Detailed parsing can be done
             details = {}
             
             # Budget
@@ -248,17 +248,17 @@ class JobScraper:
             return details
             
         except Exception as e:
-            print(f"[ERROR] İlan detayları çekilirken hata: {e}")
+            print(f"[ERROR] Error fetching listing details: {e}")
             return {}
 
 
 if __name__ == "__main__":
-    # Test için
+    # For testing
     scraper = JobScraper()
-    print("GModStore iş ilanları çekiliyor...")
+    print("Fetching GModStore job listings...")
     jobs = scraper.fetch_jobs()
-    print(f"Toplam {len(jobs)} aktif ilan bulundu:")
-    for job in jobs[:5]:  # İlk 5 tanesini göster
+    print(f"Found {len(jobs)} active listings:")
+    for job in jobs[:5]:  # Show first 5
         print(f"  - {job['title']}")
         print(f"    Budget: {job['budget']}")
         print(f"    Category: {job['category']}")

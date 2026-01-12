@@ -1,6 +1,6 @@
 """
 Discord Webhook Module
-İş ilanlarını Discord'a embed olarak gönderir
+Sends job listings to Discord as embeds
 """
 
 import requests
@@ -12,23 +12,23 @@ import config
 class DiscordWebhook:
     def __init__(self, webhook_url: str):
         """
-        Discord webhook client'ı başlatır
+        Initializes Discord webhook client
         
         Args:
-            webhook_url: Discord webhook URL'si
+            webhook_url: Discord webhook URL
         """
         self.webhook_url = webhook_url
-        self.rate_limit_delay = 1  # Mesajlar arası minimum bekleme süresi (saniye)
+        self.rate_limit_delay = 1  # Minimum wait time between messages (seconds)
     
     def send_job(self, job: Dict) -> bool:
         """
-        Tek bir iş ilanını Discord'a gönderir
+        Sends a single job listing to Discord
         
         Args:
-            job: İş ilanı verisi
+            job: Job listing data
             
         Returns:
-            bool: Başarılı mı?
+            bool: Success?
         """
         try:
             embed = self._create_embed(job)
@@ -43,31 +43,31 @@ class DiscordWebhook:
             )
             
             if response.status_code == 204:
-                print(f"[SUCCESS] İlan gönderildi: {job['title']}")
+                print(f"[SUCCESS] Listing sent: {job['title']}")
                 return True
             elif response.status_code == 429:
                 # Rate limit
                 retry_after = response.json().get('retry_after', 5)
-                print(f"[WARNING] Rate limit! {retry_after} saniye bekleniyor...")
+                print(f"[WARNING] Rate limit! Waiting {retry_after} seconds...")
                 time.sleep(retry_after)
-                return self.send_job(job)  # Tekrar dene
+                return self.send_job(job)  # Retry
             else:
-                print(f"[ERROR] Discord webhook hatası: {response.status_code} - {response.text}")
+                print(f"[ERROR] Discord webhook error: {response.status_code} - {response.text}")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] İlan gönderilirken hata: {e}")
+            print(f"[ERROR] Error sending listing: {e}")
             return False
     
     def send_jobs(self, jobs: List[Dict]) -> int:
         """
-        Birden fazla iş ilanını Discord'a gönderir
+        Sends multiple job listings to Discord
         
         Args:
-            jobs: İş ilanları listesi
+            jobs: List of job listings
             
         Returns:
-            int: Başarıyla gönderilen ilan sayısı
+            int: Number of successfully sent listings
         """
         sent_count = 0
         
@@ -75,32 +75,32 @@ class DiscordWebhook:
             if self.send_job(job):
                 sent_count += 1
             
-            # Rate limit koruması
+            # Rate limit protection
             time.sleep(self.rate_limit_delay)
         
         return sent_count
     
     def _create_embed(self, job: Dict) -> Dict:
         """
-        İş ilanı için Discord embed oluşturur
+        Creates Discord embed for job listing
         
         Args:
-            job: İş ilanı verisi
+            job: Job listing data
             
         Returns:
             Dict: Discord embed payload
         """
-        # Durum bazlı renk
+        # Status-based color
         color = config.STATUS_COLORS.get(job['status'], 0x3498DB)
         
-        # Embed başlığı ve açıklaması
-        title = job.get('title', 'Yeni İş İlanı')
+        # Embed title and description
+        title = job.get('title', 'New Job Listing')
         url = job.get('url', '')
         
-        # Ana açıklama
-        description = job.get('description', 'Açıklama mevcut değil')
+        # Main description
+        description = job.get('description', 'Description not available')
         
-        # Embed nesnesi
+        # Embed object
         embed = {
             "title": title,
             "url": url,
@@ -165,10 +165,10 @@ class DiscordWebhook:
     
     def _get_status_emoji(self, status: str) -> str:
         """
-        Durum için uygun emoji döndürür
+        Returns appropriate emoji for status
         
         Args:
-            status: İş durumu
+            status: Job status
             
         Returns:
             str: Emoji
@@ -183,15 +183,15 @@ class DiscordWebhook:
     
     def test_webhook(self) -> bool:
         """
-        Webhook'un çalışıp çalışmadığını test eder
+        Tests if webhook is working
         
         Returns:
-            bool: Çalışıyor mu?
+            bool: Is working?
         """
         try:
             test_embed = {
-                "title": "🚀 GModStore Job Scraper Başlatıldı",
-                "description": "Scraper başarıyla çalışıyor ve yeni iş ilanlarını izliyor!",
+                "title": "🚀 GModStore Job Scraper Started",
+                "description": "Scraper is running successfully and monitoring new job listings!",
                 "color": 0x00FF00,
                 "footer": {
                     "text": "GModStore Job Market Scraper"
@@ -207,30 +207,30 @@ class DiscordWebhook:
             )
             
             if response.status_code == 204:
-                print("[SUCCESS] Webhook test başarılı!")
+                print("[SUCCESS] Webhook test successful!")
                 return True
             else:
-                print(f"[ERROR] Webhook test başarısız: {response.status_code}")
+                print(f"[ERROR] Webhook test failed: {response.status_code}")
                 return False
                 
         except Exception as e:
-            print(f"[ERROR] Webhook test hatası: {e}")
+            print(f"[ERROR] Webhook test error: {e}")
             return False
 
 
 if __name__ == "__main__":
-    # Test için
+    # For testing
     if config.DISCORD_WEBHOOK_URL == "BURAYA_WEBHOOK_URL_GIRILECEK":
-        print("HATA: config.py dosyasında DISCORD_WEBHOOK_URL'yi ayarlayın!")
+        print("ERROR: Set DISCORD_WEBHOOK_URL in config.py!")
     else:
         webhook = DiscordWebhook(config.DISCORD_WEBHOOK_URL)
         webhook.test_webhook()
         
-        # Örnek ilan gönderimi
+        # Example listing send
         test_job = {
-            "title": "Test İş İlanı",
+            "title": "Test Job Listing",
             "url": "https://www.gmodstore.com/jobmarket/jobs/test123",
-            "description": "Bu bir test ilanıdır.",
+            "description": "This is a test listing.",
             "budget": "$100.00",
             "category": "Gamemode",
             "status": "Apply",

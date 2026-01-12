@@ -1,26 +1,26 @@
 # GModStore Job Scraper Configuration
 
-# Discord Webhook URL - BURAYA WEBHOOK URL'NİZİ YAPIŞTIRIN
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1460186248068206664/RuCATGIxOpiV8EgNJ0mxkVorcTP9173rqq4ALwAYTtWx4KeQtP9L-lqkC9nKg4KMWEMa"
+# Discord Webhook URL - PASTE YOUR WEBHOOK URL HERE
+DISCORD_WEBHOOK_URL = "DISCORD_WEBHHOK_URL"
 
-# Kontrol aralığı (saniye cinsinden)
-CHECK_INTERVAL = 1800  # 30 dakika
+# Check interval (in seconds)
+CHECK_INTERVAL = 1800  # 30 minutes
 
-# GModStore iş ilanları URL'si
+# GModStore job listings URL
 GMODSTORE_JOBS_URL = "https://www.gmodstore.com/jobmarket/jobs/browse"
 
-# User-Agent (bot algılamasını önlemek için)
+# User-Agent (to prevent bot detection)
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-# Aktif iş durumları (sadece bunlar gönderilecek)
+# Active job statuses (only these will be sent)
 ACTIVE_JOB_STATUSES = ["Apply", "In Progress", "Negotiations"]
 
-# Discord embed renkleri (durum bazında)
+# Discord embed colors (by status)
 STATUS_COLORS = {
-    "Apply": 0x00FF00,        # Yeşil
-    "In Progress": 0xFFFF00,  # Sarı
-    "Negotiations": 0xFFA500, # Turuncu
-    "Finished": 0x808080      # Gri
+    "Apply": 0x00FF00,        # Green
+    "In Progress": 0xFFFF00,  # Yellow
+    "Negotiations": 0xFFA500, # Orange
+    "Finished": 0x808080      # Gray
 }
 
 # GModStore logo URL

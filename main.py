@@ -1,6 +1,6 @@
 """
 GModStore Job Market Discord Scraper
-Ana uygulama - İş ilanlarını kontrol eder ve Discord'a gönderir
+Main application - Checks job listings and sends them to Discord
 """
 
 import json
@@ -18,79 +18,79 @@ from discord_webhook import DiscordWebhook
 
 class JobScraperBot:
     def __init__(self):
-        """Scraper bot'u başlatır"""
+        """Initializes the scraper bot"""
         self.scraper = JobScraper()
         self.webhook = DiscordWebhook(config.DISCORD_WEBHOOK_URL)
         self.seen_jobs_file = Path("seen_jobs.json")
         self.seen_jobs: Set[str] = self._load_seen_jobs()
         self.running = True
         
-        # Graceful shutdown için signal handler
+        # Signal handler for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
     
     def _load_seen_jobs(self) -> Set[str]:
         """
-        Daha önce görülen iş ilanlarını yükler
+        Loads previously seen job listings
         
         Returns:
-            Set[str]: Görülen ilan ID'leri
+            Set[str]: Seen listing IDs
         """
         if self.seen_jobs_file.exists():
             try:
                 with open(self.seen_jobs_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    print(f"[INFO] {len(data)} görülmüş ilan yüklendi")
+                    print(f"[INFO] Loaded {len(data)} seen listings")
                     return set(data)
             except Exception as e:
-                print(f"[WARNING] Görülen ilanlar yüklenemedi: {e}")
+                print(f"[WARNING] Could not load seen listings: {e}")
                 return set()
         else:
-            print("[INFO] Yeni seen_jobs.json dosyası oluşturulacak")
+            print("[INFO] New seen_jobs.json file will be created")
             return set()
     
     def _save_seen_jobs(self):
-        """Görülen iş ilanlarını kaydeder"""
+        """Saves seen job listings"""
         try:
             with open(self.seen_jobs_file, 'w', encoding='utf-8') as f:
                 json.dump(list(self.seen_jobs), f, indent=2)
-            print(f"[INFO] {len(self.seen_jobs)} ilan kaydedildi")
+            print(f"[INFO] Saved {len(self.seen_jobs)} listings")
         except Exception as e:
-            print(f"[ERROR] Görülen ilanlar kaydedilemedi: {e}")
+            print(f"[ERROR] Could not save seen listings: {e}")
     
     def _signal_handler(self, signum, frame):
         """
         Graceful shutdown handler (Ctrl+C)
         
         Args:
-            signum: Signal numarası
-            frame: Frame nesnesi
+            signum: Signal number
+            frame: Frame object
         """
-        print("\n[INFO] Kapatma sinyali alındı. Temizlik yapılıyor...")
+        print("\n[INFO] Shutdown signal received. Cleaning up...")
         self.running = False
         self._save_seen_jobs()
-        print("[INFO] Scraper kapatıldı. Güle güle!")
+        print("[INFO] Scraper closed. Goodbye!")
         sys.exit(0)
     
     def check_and_send_new_jobs(self) -> int:
         """
-        Yeni iş ilanlarını kontrol eder ve Discord'a gönderir
+        Checks for new job listings and sends them to Discord
         
         Returns:
-            int: Gönderilen yeni ilan sayısı
+            int: Number of new listings sent
         """
-        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] İlanlar kontrol ediliyor...")
+        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking listings...")
         
-        # İlanları çek
+        # Fetch listings
         jobs = self.scraper.fetch_jobs()
         
         if not jobs:
-            print("[WARNING] Hiç ilan bulunamadı veya bir hata oluştu")
+            print("[WARNING] No listings found or an error occurred")
             return 0
         
-        print(f"[INFO] {len(jobs)} aktif ilan bulundu")
+        print(f"[INFO] Found {len(jobs)} active listings")
         
-        # Yeni ilanları filtrele
+        # Filter new listings
         new_jobs = []
         for job in jobs:
             job_id = job.get('job_id')
@@ -99,85 +99,85 @@ class JobScraperBot:
                 self.seen_jobs.add(job_id)
         
         if not new_jobs:
-            print("[INFO] Yeni ilan yok")
+            print("[INFO] No new listings")
             return 0
         
-        print(f"[INFO] {len(new_jobs)} yeni ilan bulundu!")
+        print(f"[INFO] Found {len(new_jobs)} new listings!")
         
-        # Yeni ilanları Discord'a gönder
+        # Send new listings to Discord
         sent_count = self.webhook.send_jobs(new_jobs)
         
-        # Görülen ilanları kaydet
+        # Save seen listings
         self._save_seen_jobs()
         
-        print(f"[SUCCESS] {sent_count}/{len(new_jobs)} ilan başarıyla gönderildi")
+        print(f"[SUCCESS] {sent_count}/{len(new_jobs)} listings sent successfully")
         
         return sent_count
     
     def run(self):
         """
-        Ana döngü - Belirli aralıklarla ilanları kontrol eder
+        Main loop - Checks listings at regular intervals
         """
         print("=" * 60)
         print("GModStore Job Market Discord Scraper")
         print("=" * 60)
-        print(f"Kontrol aralığı: {config.CHECK_INTERVAL} saniye ({config.CHECK_INTERVAL // 60} dakika)")
-        print(f"Hedef URL: {config.GMODSTORE_JOBS_URL}")
-        print("Başlatılıyor...\n")
+        print(f"Check interval: {config.CHECK_INTERVAL} seconds ({config.CHECK_INTERVAL // 60} minutes)")
+        print(f"Target URL: {config.GMODSTORE_JOBS_URL}")
+        print("Starting...\n")
         
-        # Webhook testi
+        # Webhook test
         if config.DISCORD_WEBHOOK_URL == "BURAYA_WEBHOOK_URL_GIRILECEK":
-            print("[ERROR] config.py dosyasında DISCORD_WEBHOOK_URL'yi ayarlayın!")
-            print("Çıkış yapılıyor...")
+            print("[ERROR] Set DISCORD_WEBHOOK_URL in config.py!")
+            print("Exiting...")
             sys.exit(1)
         
-        print("[INFO] Discord webhook test ediliyor...")
+        print("[INFO] Testing Discord webhook...")
         if not self.webhook.test_webhook():
-            print("[ERROR] Webhook testi başarısız! URL'yi kontrol edin.")
-            # Headless/service modunda input() çalışmaz, otomatik devam et
+            print("[ERROR] Webhook test failed! Check the URL.")
+            # In headless/service mode input() doesn't work, continue automatically
             if sys.stdin.isatty():
-                print("Devam etmek istiyor musunuz? (y/N): ", end='')
+                print("Do you want to continue? (y/N): ", end='')
                 response = input().strip().lower()
                 if response != 'y':
                     sys.exit(1)
             else:
-                print("[WARNING] Service modunda çalışıyor, devam ediliyor...")
+                print("[WARNING] Running in service mode, continuing...")
                 time.sleep(5)
         
-        print("\n[INFO] Bot başlatıldı. Ctrl+C ile durdurun.\n")
+        print("\n[INFO] Bot started. Press Ctrl+C to stop.\n")
         
-        # İlk kontrol hemen yapılsın
+        # Perform first check immediately
         try:
             self.check_and_send_new_jobs()
         except Exception as e:
-            print(f"[ERROR] İlk kontrol sırasında hata: {e}")
+            print(f"[ERROR] Error during first check: {e}")
         
-        # Ana döngü
+        # Main loop
         while self.running:
             try:
-                # Sonraki kontrole kadar bekle
-                print(f"\n[INFO] Sonraki kontrol: {config.CHECK_INTERVAL} saniye sonra...")
+                # Wait until next check
+                print(f"\n[INFO] Next check: in {config.CHECK_INTERVAL} seconds...")
                 time.sleep(config.CHECK_INTERVAL)
                 
-                # Kontrol yap
+                # Perform check
                 self.check_and_send_new_jobs()
                 
             except KeyboardInterrupt:
-                # Ctrl+C - signal handler yakalayacak
+                # Ctrl+C - signal handler will catch
                 break
             except Exception as e:
-                print(f"[ERROR] Beklenmeyen hata: {e}")
-                print("[INFO] 60 saniye sonra tekrar denenecek...")
+                print(f"[ERROR] Unexpected error: {e}")
+                print("[INFO] Will retry in 60 seconds...")
                 time.sleep(60)
 
 
 def main():
-    """Ana fonksiyon"""
+    """Main function"""
     try:
         bot = JobScraperBot()
         bot.run()
     except Exception as e:
-        print(f"[FATAL ERROR] Uygulama başlatılamadı: {e}")
+        print(f"[FATAL ERROR] Application could not be started: {e}")
         sys.exit(1)
 
 
