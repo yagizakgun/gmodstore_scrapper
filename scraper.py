@@ -3,6 +3,8 @@ GModStore Job Market Scraper
 Web scraping module - Fetches and parses job listings
 """
 
+import os
+import certifi
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Optional
@@ -19,6 +21,42 @@ class JobScraper:
             'User-Agent': config.USER_AGENT
         })
         self.request_delay = getattr(config, 'DETAIL_REQUEST_DELAY', 1.5)  # Delay between detail page requests
+        
+        # Configure SSL
+        self.ca_bundle_path = self._configure_ssl()
+        if self.ca_bundle_path:
+            self.session.verify = self.ca_bundle_path
+
+    def _configure_ssl(self) -> Optional[str]:
+        """
+        Configures SSL certificate bundle path.
+        Checks if certifi's default path exists, if not, tries common system paths.
+        """
+        # 1. Check certifi default path
+        certifi_path = certifi.where()
+        if os.path.exists(certifi_path):
+            return certifi_path
+            
+        print(f"[WARNING] Certifi path not found: {certifi_path}")
+        
+        # 2. Check common system CA bundle paths
+        common_paths = [
+            "/etc/ssl/certs/ca-certificates.crt", # Debian/Ubuntu/Gentoo etc.
+            "/etc/pki/tls/certs/ca-bundle.crt",   # Fedora/RHEL 6
+            "/etc/ssl/ca-bundle.pem",             # OpenSUSE
+            "/etc/pki/tls/cacert.pem",            # OpenELEC
+            "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem", # CentOS/RHEL 7
+            "/usr/local/etc/ssl/cert.pem",        # FreeBSD
+            "/etc/ssl/cert.pem",                  # macOS
+        ]
+        
+        for path in common_paths:
+            if os.path.exists(path):
+                print(f"[INFO] Using system CA bundle: {path}")
+                return path
+                
+        print("[ERROR] Could not find a suitable TLS CA certificate bundle!")
+        return None
     
     def fetch_jobs(self) -> List[Dict]:
         """
